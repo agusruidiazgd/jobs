@@ -6,15 +6,19 @@ import ContentContainer from "./components/ContentContainer/ContentContainer";
 import axios from 'axios';
 import Modal from './components/Modal/Modal';
 import UserModal from './components/UserModal/UserModal';
+import JobModal from './components/JobModal/JobModal';
 
 const App = () => {
 
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [selectedUser, setSelectedUser] = useState();
+  const [selectedJob, setSelectedJob] = useState([]);
   const [displayUserModal, setDisplayUserModal] = useState(false);
+  const [displayJobModal, setDisplayJobModal] = useState(false);
 
   const headers = ["Name", "Avatar", "Job Title", "Actions"];
+  const headersJobs = ["Name Job", "Actions"];
 
   const getData = async (url, setter) => {
     try {
@@ -33,6 +37,11 @@ const App = () => {
     setDisplayUserModal(true);
   }
 
+  const editJob = job => {
+    setSelectedJob(job);
+    setDisplayJobModal(true);
+  }
+
   useEffect(() => getUsers(), []);
   useEffect(() => getJobs(), []);
 
@@ -45,6 +54,13 @@ const App = () => {
       {
         displayUserModal ?
         <UserModal user={selectedUser} jobs={jobs} close={() => setDisplayUserModal(false)} users={users} setUsers={setUsers} />
+        :
+        null  
+      }
+
+      {
+        displayJobModal ?
+        <JobModal job={selectedJob} jobs={jobs} close={() => setDisplayJobModal(false)} setJobs={setJobs} />
         :
         null  
       }
@@ -68,6 +84,28 @@ const App = () => {
                       </button>
                   </td>
                 </tr>
+              )
+            })
+          }
+        </Table>
+      </ContentContainer>
+      <ContentContainer>
+        <Table headers={headersJobs}>
+          {
+            jobs.map(job=>{
+              return(
+                <tr>
+                  <td>{job.name}</td>
+                  <td>
+                    <button
+                      className="button-green"
+                      onClick={() => editJob(job)}
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+
               )
             })
           }
