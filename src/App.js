@@ -1,21 +1,24 @@
 import React, {useState, useEffect} from 'react';
-import logo from './logo.svg';
 import './App.scss';
 import Table from "./components/Table/Table";
 import ContentContainer from "./components/ContentContainer/ContentContainer";
 import axios from 'axios';
 import Modal from './components/Modal/Modal';
 import UserModal from './components/UserModal/UserModal';
+import NewUserModal from './components/NewUserModal/NewUserModal';
 import JobModal from './components/JobModal/JobModal';
 
 const App = () => {
 
   const [users, setUsers] = useState([]);
+ 
   const [jobs, setJobs] = useState([]);
   const [selectedUser, setSelectedUser] = useState();
   const [selectedJob, setSelectedJob] = useState([]);
   const [displayUserModal, setDisplayUserModal] = useState(false);
   const [displayJobModal, setDisplayJobModal] = useState(false);
+  const [displayNewUserModal, setDisplayNewUserModal] = useState(false);
+  
 
   const headers = ["Name", "Avatar", "Job Title", "Actions"];
   const headersJobs = ["Name Job", "Actions"];
@@ -42,6 +45,10 @@ const App = () => {
     setDisplayJobModal(true);
   }
 
+  const addUser = () =>{
+    setDisplayNewUserModal(true);
+  }
+
   useEffect(() => getUsers(), []);
   useEffect(() => getJobs(), []);
 
@@ -50,6 +57,10 @@ const App = () => {
       <header className="main-header">
         <h1>Jobs</h1>
       </header>
+
+      <button className="button-green fixed" onClick={() => addUser()}>
+        Add user +
+      </button>
 
       {
         displayUserModal ?
@@ -61,6 +72,13 @@ const App = () => {
       {
         displayJobModal ?
         <JobModal job={selectedJob} jobs={jobs} close={() => setDisplayJobModal(false)} setJobs={setJobs} />
+        :
+        null  
+      }
+
+      {
+        displayNewUserModal ?
+        <NewUserModal user={selectedUser} jobs={jobs} close={() => setDisplayNewUserModal(false)} sers={users} setUsers={setUsers} />
         :
         null  
       }

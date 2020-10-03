@@ -4,8 +4,8 @@ import Modal from '../Modal/Modal';
 import axios from "axios";
 
 const UserModal = ({user, jobs, close, users, setUsers}) => {
-    const [newName, setNewName] = useState(user.name);
-    const [newJobId, setNewJobId] = useState(user.jobId);
+    const [newName, setNewName] = useState((user)? user.name : "");
+    const [newJobId, setNewJobId] = useState(user? user.jobId : "");
 
     const changeName = event => setNewName(event.target.value);
     const changeJobId = event => setNewJobId(event.target.value);
@@ -27,12 +27,28 @@ const UserModal = ({user, jobs, close, users, setUsers}) => {
             close();
         }).catch(err => alert("ERROR!"));
     }
+
+    const add = () => {
+        const newUser = {
+            jobId: newJobId,
+            name: newName
+        };
+
+        axios.post(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users`, newUser)
+        .then(res => {
+            const newList = [...users];
+            newList.push(newUser);
+            //setUsers(newList);
+            close();
+        }).catch(err => alert("ERROR!"));
+    }
         
     return (
-        <Modal title={`Edit User ${user.name}`} close={close}>
+        <Modal title={user? `Edit User ${user.name}` : `Add new user`} close={close}>
             <form>
-                <input type="text" defaultValue={user.name} onChange={changeName}/>
-                <select defaultValue={user.jobId} onChange={changeJobId}>
+                <input type="text" defaultValue={user? user.name : newName} onChange={changeName}/>
+                <select defaultValue={user? user.jobId : newJobId} onChange={changeJobId}>
+                    <option value="-1" selected disabled>elegir new job</option>
                     {
                         jobs.map(job => {
                             return (
@@ -43,7 +59,11 @@ const UserModal = ({user, jobs, close, users, setUsers}) => {
                         })
                     }
                 </select>
-                <button type="button" onClick={save}>Save</button>
+                {
+                    user? <button type="button" onClick={save}>Save</button> : 
+                    <button type="button" onClick={add}>Add</button>
+                }
+                
             </form>
         </Modal>
     );

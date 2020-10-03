@@ -28,4 +28,12 @@
   &:hover {
     background-color: darken(teal, 10);
   }
+
+  &.fixed{
+    position: fixed;
+    left:0;
+    top: calc(100vh - 400px);
+    
+  }
 }
+
