@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './UserModal.scss';
 import Modal from '../Modal/Modal';
 import axios from "axios";
+import {ACTION_GET,ACTION_ADD, ACTION_EDIT , reducer} from '../../reducers';
 
 const UserModal = ({user, jobs, close, users, setUsers}) => {
     const [newName, setNewName] = useState((user)? user.name : "");
@@ -10,35 +11,70 @@ const UserModal = ({user, jobs, close, users, setUsers}) => {
     const changeName = event => setNewName(event.target.value);
     const changeJobId = event => setNewJobId(event.target.value);
 
+    // const save = () => {
+    //     const newUser = {
+    //         ...user,
+    //         jobId: newJobId,
+    //         name: newName
+    //     };
+
+    //     axios.put(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users/${newUser.id}`, newUser)
+    //     .then(res => {
+    //         const newList = [...users];
+    //         const userIndex = newList.findIndex(u => u.id == user.id);
+    //         if(userIndex === -1) throw new Error("ERROR!!! HORRROR!!!!");
+    //         newList[userIndex] = newUser;
+    //         setUsers(newList); //esto sería el dispatch
+    //         close();
+    //     }).catch(err => alert("ERROR!"));
+    // }
+
     const save = () => {
-        const newUser = {
+        const payload = {
             ...user,
             jobId: newJobId,
             name: newName
         };
 
-        axios.put(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users/${newUser.id}`, newUser)
+        axios.put(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users/${payload.id}`, payload)
         .then(res => {
-            const newList = [...users];
-            const userIndex = newList.findIndex(u => u.id == user.id);
-            if(userIndex === -1) throw new Error("ERROR!!! HORRROR!!!!");
-            newList[userIndex] = newUser;
-            setUsers(newList);
+            // const newList = [...users];
+            // const userIndex = newList.findIndex(u => u.id == user.id);
+            // if(userIndex === -1) throw new Error("ERROR!!! HORRROR!!!!");
+            // newList[userIndex] = newUser;
+            setUsers({type: ACTION_EDIT, payload}); //esto sería el dispatch
             close();
         }).catch(err => alert("ERROR!"));
     }
 
+
+    // const add = () => {
+    //     const newUser = {
+    //         jobId: newJobId,
+    //         name: newName
+    //     };
+
+    //     axios.post(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users`, newUser)
+    //     .then(res => {
+    //         const newList = [...users];
+    //         newList.push(newUser);
+    //         //setUsers(newList);
+    //         close();
+    //     }).catch(err => alert("ERROR!"));
+    // }
+
     const add = () => {
-        const newUser = {
+        const payload = {
             jobId: newJobId,
             name: newName
         };
 
-        axios.post(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users`, newUser)
+        axios.post(`https://5f518d325e98480016123ada.mockapi.io/api/v1/users`, payload)
         .then(res => {
-            const newList = [...users];
-            newList.push(newUser);
+            //const newList = [...users];
+            //newList.push(newUser);
             //setUsers(newList);
+            setUsers({type: ACTION_ADD, payload});
             close();
         }).catch(err => alert("ERROR!"));
     }
