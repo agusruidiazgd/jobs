@@ -4,9 +4,8 @@ export const ACTION_ADD = "ADD";
 
 export const reducer = (users, action) =>{
     switch(action.type){
-
         case ACTION_GET:
-            return action.payload;
+            return [action.payload];
         case ACTION_ADD:
             return (
                 [...users, action.payload]

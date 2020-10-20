@@ -3,19 +3,20 @@ import './App.scss';
 import Table from "./components/Table/Table";
 import ContentContainer from "./components/ContentContainer/ContentContainer";
 import axios from 'axios';
-import Modal from './components/Modal/Modal';
 import UserModal from './components/UserModal/UserModal';
 import NewUserModal from './components/NewUserModal/NewUserModal';
 import JobModal from './components/JobModal/JobModal';
-import {ACTION_GET,ACTION_ADD, ACTION_EDIT , reducer} from './reducers';
+import {ACTION_GET, reducer} from './reducers/reducerUser';
+import {ACTION_GET_JOB, ACTION_EDIT_JOB,ACTION_DELETE_JOB, reducerJob} from './reducers/reducerJobs';
 
 const App = () => {
 
-  //const [users, setUsers] = useState([]);
-  const [users, dispatch] = useReducer(reducer, []);
-  const [jobs, setJobs] = useState([]);
+  const [users, dispatchUsers] = useReducer(reducer, []);
+  const [jobs, dispatchJobs] = useReducer(reducerJob, []);
+  
   const [selectedUser, setSelectedUser] = useState();
   const [selectedJob, setSelectedJob] = useState([]);
+
   const [displayUserModal, setDisplayUserModal] = useState(false);
   const [displayJobModal, setDisplayJobModal] = useState(false);
   const [displayNewUserModal, setDisplayNewUserModal] = useState(false);
@@ -24,29 +25,21 @@ const App = () => {
   const headers = ["Name", "Avatar", "Job Title", "Actions"];
   const headersJobs = ["Name Job", "Actions"];
 
-  const getData = async (url, setter) => {
+  const getData = async (url, dispatch, actionType) => {
     try {
-      const res = await axios.get(url);
-      setter(res.data);
+      const resp = await axios.get(url);
+      dispatch({type:actionType, payload: resp.data });
     }catch(err) {
-      alert("Error getting data", err);
+      alert(err);
     }
   }
+  
 
-  const getData2 = async (url, dispatch, actionType) => {
-    try {
-      const res = await axios.get(url);
-      dispatch({type:actionType, payload:res.data });
-    }catch(err) {
-      alert("Error getting data", err);
-    }
-  }
-
-  const getUsers = async () => getData2("https://5f518d325e98480016123ada.mockapi.io/api/v1/users", dispatch, ACTION_GET );
-  const getJobs = async () => getData("https://5f518d325e98480016123ada.mockapi.io/api/v1/jobs", setJobs);
+  const getUsers = async () => getData("https://5f518d325e98480016123ada.mockapi.io/api/v1/users", dispatchUsers, ACTION_GET );
+  
+  const getJobs = async () => getData("https://5f518d325e98480016123ada.mockapi.io/api/v1/jobs", dispatchJobs, ACTION_GET_JOB );
 
   const editUser = user => {
-
     setSelectedUser(user);
     setDisplayUserModal(true);
   }
@@ -58,6 +51,15 @@ const App = () => {
 
   const addUser = () =>{
     setDisplayNewUserModal(true);
+  }
+
+  const deleteJob = job =>{
+    console.log("ver", job.id);
+    axios.delete(`https://5f518d325e98480016123ada.mockapi.io/api/v1/jobs/${job.id}`)
+    .then(res =>{
+      console.log("jobs", res.data);
+      dispatchJobs({type:ACTION_DELETE_JOB, payload:res.data});
+    }).catch(err => console.log("error deleting data", err));
   }
 
   useEffect(() => getUsers(), []);
@@ -75,21 +77,21 @@ const App = () => {
 
       {
         displayUserModal ?
-        <UserModal user={selectedUser} jobs={jobs} close={() => setDisplayUserModal(false)} users={users} setUsers={dispatch} />
+        <UserModal user={selectedUser} jobs={jobs} close={() => setDisplayUserModal(false)} users={users} setUsers={dispatchUsers} />
         :
         null  
       } 
 
       { 
         displayJobModal ?
-        <JobModal job={selectedJob} jobs={jobs} close={() => setDisplayJobModal(false)} setJobs={setJobs} />
+        <JobModal job={selectedJob} jobs={jobs} close={() => setDisplayJobModal(false)} setJobs={dispatchJobs} />
         :
         null  
       }
 
       {
         displayNewUserModal ?
-        <NewUserModal user={selectedUser} jobs={jobs} close={() => setDisplayNewUserModal(false)} sers={users} setUsers={dispatch} />
+        <NewUserModal user={selectedUser} jobs={jobs} close={() => setDisplayNewUserModal(false)} users={users} setUsers={dispatchUsers} />
         :
         null  
       }
@@ -100,7 +102,7 @@ const App = () => {
             users.map(user => {
               const job = jobs.find(job => job.id == user.jobId) || {name: "Not Found"};
               return (
-                <tr>
+                <tr key={user.id}>
                   <td>{user.name}</td>
                   <td><img className="avatar-img" src={user.avatar} /></td>
                   <td>{job.name}</td>
@@ -113,7 +115,7 @@ const App = () => {
                       </button>
                   </td>
                 </tr>
-              )
+              );
             })
           }
         </Table>
@@ -123,7 +125,7 @@ const App = () => {
           {
             jobs.map(job=>{
               return(
-                <tr>
+                <tr key={job.id}>
                   <td>{job.name}</td>
                   <td>
                     <button
@@ -133,13 +135,21 @@ const App = () => {
                       Edit
                     </button>
                   </td>
+                  <td>
+                    <button
+                      className="button-green"
+                      onClick={() => deleteJob(job)}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
 
               )
             })
           }
         </Table>
-      </ContentContainer>
+      </ContentContainer> 
     </React.Fragment>
   );
 }
